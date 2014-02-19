@@ -208,16 +208,16 @@
       };
 
       NodeEdit.prototype.renderProfile = function(node, nodeDiv, blacklist, propNumber) {
-        var $nodeDeselect, $nodeEdit, $nodeHeader, $showMore, counter, header, nodeLength, p, v, whitelist,
+        var $nodeDeselect, $nodeEdit, $nodeHeader, $showMore, $spokeHolder, counter, header, nodeLength, p, v, whitelist,
           _this = this;
         nodeDiv.empty();
         header = this.findHeader(node);
         $nodeHeader = $("<div class=\"node-profile-title\">" + header + "</div>").appendTo(nodeDiv);
-        $nodeEdit = $("<i class=\"fa fa-pencil-square\"></i>").prependTo($nodeHeader);
+        $nodeEdit = $("<i class=\"fa fa-pencil-square \"></i>").css("margin", "6px").appendTo($nodeHeader);
         $nodeEdit.click(function() {
           return _this.editNode(node, nodeDiv, blacklist);
         });
-        $nodeDeselect = $("<i class=\"right fa fa-times\"></i>").appendTo($nodeHeader);
+        $nodeDeselect = $("<i class=\"right fa fa-times\"></i>").css("margin", "1px").appendTo($nodeHeader);
         $nodeDeselect.click(function() {
           return _this.selection.toggleSelection(node);
         });
@@ -253,13 +253,14 @@
           }
         });
         if (propNumber < nodeLength) {
-          $showMore = $("<div class=\"node-profile-property\"><a href='#'>Show More...</a></div>").appendTo(nodeDiv);
+          $showMore = $("<div class='showMore'><a href='#'>Show More...</a></div>").appendTo(nodeDiv);
           $showMore.click(function() {
             return _this.renderProfile(node, nodeDiv, blacklist, propNumber + 1);
           });
         }
         this.addLinker(node, nodeDiv);
-        return this.addSpokes(node, nodeDiv);
+        $spokeHolder = $("<div class='spokeHolder'></div>").appendTo(nodeDiv);
+        return this.addSpokes(node, $spokeHolder, 2);
       };
 
       NodeEdit.prototype.addLinker = function(node, nodeDiv) {
@@ -268,10 +269,10 @@
         this.tempLink = {};
         nodeID = node['_id'];
         linkSideID = "id=" + "'linkside" + nodeID + "'";
-        $linkSide = $('<div ' + linkSideID + '>').appendTo(nodeDiv);
+        $linkSide = $('<div ' + linkSideID + '><hr style="margin:3px"></div>').appendTo(nodeDiv);
         holderClassName = "'profilelinkHolder" + nodeID + "'";
         className = "class=" + holderClassName;
-        $linkHolder = $('<textarea placeholder="Add Link" ' + className + 'rows="1" cols="35"></textarea><br>').css("width", 100).css("margin-left", 85).appendTo($linkSide);
+        $linkHolder = $('<input type="button"' + className + 'value="Add Link"></input><br>').css("width", 100).css("margin-left", 85).appendTo($linkSide);
         linkWrapperDivID = "id=" + "'source-container" + nodeID + "'";
         $linkWrapper = $('<div ' + linkWrapperDivID + ' class="linkWrapperClass">').appendTo($linkSide);
         $linkInputName = $('<textarea placeholder=\"Link Name [optional]\" rows="1" cols="35"></textarea><br>').appendTo($linkWrapper);
@@ -288,6 +289,13 @@
           return $('#toplink-instructions').replaceWith('<span id="toplink-instructions" style="color:black; font-size:20px">Click a Node to select the target.</span>');
         });
         $linkWrapper.hide();
+        $(document).on("click", function() {
+          $linkWrapper.hide();
+          return $linkHolder.show();
+        });
+        $linkWrapper.on("click", function(e) {
+          return e.stopPropagation();
+        });
         $linkHolder.focus(function() {
           $linkWrapper.show();
           $linkInputName.focus();
@@ -323,13 +331,14 @@
         });
       };
 
-      NodeEdit.prototype.addSpokes = function(node, nodeDiv) {
-        var $spokeDiv, $spokesDiv, lHash, link, nHash, savedSpoke, spoke, spokeID, spokes, spokesID, _i, _len, _results,
+      NodeEdit.prototype.addSpokes = function(node, spokeHolder, maxSpokes) {
+        var $showMoreSpokes, $spokeDiv, $spokesDiv, lHash, link, nHash, savedSpoke, spoke, spokeID, spoke_counter, spokes, spokesID, _i, _len,
           _this = this;
+        spokeHolder.empty();
         nHash = this.graphModel.get("nodeHash");
         lHash = this.graphModel.get("linkHash");
         spokesID = "spokesDiv" + (nHash(node));
-        $spokesDiv = $('<div id=' + spokesID + '>').appendTo(nodeDiv);
+        $spokesDiv = $('<div id=' + spokesID + '>').appendTo(spokeHolder);
         spokes = (function() {
           var _i, _len, _ref, _results;
           _ref = this.graphModel.getLinks();
@@ -343,9 +352,14 @@
           return _results;
         }).call(this);
         if (spokes.length > 0) {
-          _results = [];
+          spoke_counter = 0;
           for (_i = 0, _len = spokes.length; _i < _len; _i++) {
             spoke = spokes[_i];
+            if (spoke_counter >= maxSpokes) {
+              break;
+            } else {
+              spoke_counter++;
+            }
             savedSpoke = spoke;
             if (!(spoke.name != null) || spoke.name === "") {
               spoke.name = "<i>empty link</i>";
@@ -354,9 +368,13 @@
               spoke.color = "#A9A9A9";
             }
             spokeID = "spokeDiv";
+<<<<<<< HEAD
             $spokeDiv = $('<div id=' + spokeID + '>' + spoke.name + "..." + '</div>').css("background-color", "" + spoke.color).css("padding", "4px").css("margin", "1px").css("border", "1px solid black").appendTo($spokesDiv);
+=======
+            $spokeDiv = $('<div class=' + spokeID + '>' + spoke.name + "..." + '</div>').css("background-color", "" + spoke.color).css("padding", "4px").css("margin", "1px").css("border", "1px solid black").css("font-size", "12px").appendTo($spokesDiv);
+>>>>>>> 52efa60990d804bc86e440095645b75ec2628818
             $spokeDiv.data("link", [spoke]);
-            _results.push($spokeDiv.on("click", function(e) {
+            $spokeDiv.on("click", function(e) {
               var clickedLink;
               clickedLink = $(e.target).data("link")[0];
               if (!clickedLink.selected) {
@@ -365,9 +383,15 @@
                 $(e.target).css("background-color", "" + clickedLink.color);
               }
               return _this.linkSelection.toggleSelection(clickedLink);
-            }));
+            });
           }
-          return _results;
+        }
+        if (maxSpokes < spokes.length) {
+          $showMoreSpokes = $("<div class=\"showMore\"><a href='#'>Show More...</a></div>").appendTo(spokeHolder);
+          return $showMoreSpokes.on("click", function(e) {
+            $('<div id=' + spokesID + '>').empty();
+            return _this.addSpokes(node, spokeHolder, maxSpokes + 1);
+          });
         }
       };
 
