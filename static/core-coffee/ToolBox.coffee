@@ -24,6 +24,13 @@ define [], () ->
 
     render: ->
       $container = $("<div id=\"show-all-container\">").appendTo(@$el)
+      # $mouseover = $("<div id=\"tooltips\">").appendTo(@$el)
+      # mouseX = 0
+      # mouseY = 0
+      # $(document).mousemove( (e) =>
+      #   mouseX = e.pageX 
+      #   mouseY = e.pageY
+      # )
 
       $('#listviewButton').click(() =>
         $(@listView.el).show()
@@ -42,6 +49,9 @@ define [], () ->
       $('#minimapButton').click(() =>
         $('#minimapPopOut').toggle()
         )
+      # $('#minimapButton').hover(() =>
+      #   $('#testing').css({'bottom':mouseY,'right':mouseX}).fadeIn('slow')
+      #   )
 
       $('#slidersButton').click(() =>
         $('#slidersPopOut').toggle()

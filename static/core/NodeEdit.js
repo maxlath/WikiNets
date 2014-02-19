@@ -63,7 +63,7 @@
       };
 
       NodeEdit.prototype.editNode = function(node, nodeDiv, blacklist) {
-        var $nodeCancel, $nodeDelete, $nodeMoreFields, $nodeSave, colorEditingField, header, nodeInputNumber, origColor,
+        var $nodeCancel, $nodeDelete, $nodeMoreFields, $nodeSave, header, nodeInputNumber, origColor,
           _this = this;
         console.log("Editing node: " + node['_id']);
         nodeInputNumber = 0;
@@ -82,14 +82,17 @@
             }
           }
         });
-        colorEditingField = '\
-            <form action="#" method="post">\
-                <div class="controlset">Color<input id="color' + node['_id'] + '" name="color' + node['_id'] + '" type="text" value="' + origColor + '"/></div>\
-            </form>\
-          ';
-        $(colorEditingField).appendTo(nodeDiv);
-        $("#color" + node['_id']).colorPicker({
-          showHexField: false
+        $(document).ready(function() {
+          var colorEditingField;
+          colorEditingField = '\
+	            <form action="#" method="post">\
+	                <div class="controlset">Color<input id="color' + node['_id'] + '" name="color' + node['_id'] + '" type="text" value="' + origColor + '"/></div>\
+	            </form>\
+	          ';
+          $(colorEditingField).appendTo(nodeDiv);
+          return $("#color" + node['_id']).colorPicker({
+            showHexField: false
+          });
         });
         $nodeMoreFields = $("<input id=\"moreNode" + node['_id'] + "EditFields\" type=\"button\" value=\"+\">").appendTo(nodeDiv);
         $nodeMoreFields.click(function() {
@@ -351,7 +354,7 @@
               spoke.color = "#A9A9A9";
             }
             spokeID = "spokeDiv";
-            $spokeDiv = $('<div id=' + spokeID + '>' + spoke.name + '</div>').css("background-color", "" + spoke.color).css("padding", "4px").css("margin", "1px").css("border", "1px solid black").appendTo($spokesDiv);
+            $spokeDiv = $('<div id=' + spokeID + '>' + spoke.name + "..." + '</div>').css("background-color", "" + spoke.color).css("padding", "4px").css("margin", "1px").css("border", "1px solid black").appendTo($spokesDiv);
             $spokeDiv.data("link", [spoke]);
             _results.push($spokeDiv.on("click", function(e) {
               var clickedLink;

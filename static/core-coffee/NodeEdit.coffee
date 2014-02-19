@@ -63,15 +63,15 @@ define [], () ->
               if value.toUpperCase() in colors
                 origColor = value
 
-
-          colorEditingField = '
-            <form action="#" method="post">
-                <div class="controlset">Color<input id="color'+node['_id']+'" name="color'+node['_id']+'" type="text" value="'+origColor+'"/></div>
-            </form>
-          '
-          $(colorEditingField).appendTo(nodeDiv)
-          $("#color#{node['_id']}").colorPicker {showHexField: false} 
-
+          $(document).ready(()=>
+	          colorEditingField = '
+	            <form action="#" method="post">
+	                <div class="controlset">Color<input id="color'+node['_id']+'" name="color'+node['_id']+'" type="text" value="'+origColor+'"/></div>
+	            </form>
+	          '
+	          $(colorEditingField).appendTo(nodeDiv)
+	          $("#color#{node['_id']}").colorPicker {showHexField: false} 
+          )
           $nodeMoreFields = $("<input id=\"moreNode#{node['_id']}EditFields\" type=\"button\" value=\"+\">").appendTo(nodeDiv)
           $nodeMoreFields.click(() =>
             @addField(nodeInputNumber, "Node#{node['_id']}Edit")
