@@ -22,7 +22,7 @@
         this.graphModel = instances["GraphModel"];
         this.dataProvider = instances["local/WikiNetsDataProvider"];
         this.selection = instances["NodeSelection"];
-        $(this.el).attr("class", "toolboxpopout").css("background", "white");
+        $(this.el).attr("class", "toolboxpopout");
         $(this.el).appendTo($('#maingraph'));
         $(this.el).hide();
         this.graphView = instances["GraphView"];
@@ -30,7 +30,7 @@
       };
 
       ToolBox.prototype.render = function() {
-        var $chooseSelectButton, $clearAllButton, $clearSelectedButton, $container, $deselectAllButton, $expandSelectionButton, $pinSelectedButton, $selectAllButton, $showAllButton, $showLearningButton, $showResearchButton, $showStudentLifeButton, $unpinAllButton, $unpinSelectedButton,
+        var $chooseSelectButton, $clearAllButton, $clearSelectedButton, $container, $deselectAllButton, $expandSelectionButton, $pinSelectedButton, $selectAllButton, $showAllButton, $showLearningButton, $showResearchButton, $showStudentLifeButton, $unpinAllButton, $unpinSelectedButton, mouseX, mouseY,
           _this = this;
         $container = $("<div id=\"show-all-container\">").appendTo(this.$el);
         $('#listviewButton').click(function() {
@@ -46,13 +46,45 @@
           return $('#graphviewButton').css("background", "url(\"images/icons/blue/share_24x24.png\")");
         });
         $('#minimapButton').click(function() {
-          return $('#minimapPopOut').toggle();
+          $('#slidersPopOut').hide();
+          $('#minimapPopOut').toggle();
+          return $(_this.el).hide();
         });
         $('#slidersButton').click(function() {
-          return $('#slidersPopOut').toggle();
+          $('#slidersPopOut').toggle();
+          $('#minimapPopOut').hide();
+          return $(_this.el).hide();
         });
         $('#moreoptionsButton').click(function() {
+          $('#slidersPopOut').hide();
+          $('#minimapPopOut').hide();
           return $(_this.el).toggle();
+        });
+        $('#maingraph').append("<div id=\"tooltip\" class=\"tooltiphover\" style=\"display:none\"></div>");
+        mouseX = 0;
+        mouseY = 0;
+        $(document).mousemove(function(e) {
+          var widthDigits;
+          widthDigits = $('#maingraph').css("width").length;
+          return mouseX = $('#maingraph').css("width").substring(0, widthDigits - 2) - e.pageX;
+        });
+        $('#slidersButton').hover(function() {
+          $("#tooltip").empty();
+          $("<p style=\"font-size:10px\"><b>SLIDERS:</b> <br> <i>currently allows adjustment of spacing of the nodes</i></p>").appendTo($("#tooltip"));
+          $("#tooltip").css("right", mouseX - 30);
+          return $("#tooltip").toggle();
+        });
+        $('#minimapButton').hover(function() {
+          $("#tooltip").empty();
+          $("<p style=\"font-size:10px\"><b>MINIMAP:</b> <br> <i>a closeup view of the most recently selected node</i></p>").appendTo($("#tooltip"));
+          $("#tooltip").css("right", mouseX - 30);
+          return $("#tooltip").toggle();
+        });
+        $('#moreoptionsButton').hover(function() {
+          $("#tooltip").empty();
+          $("<p style=\"font-size:10px\"><b>MORE OPTIONS:</b> <br> <i>additional buttons with different functionality</i></p>").appendTo($("#tooltip"));
+          $("#tooltip").css("right", mouseX - 30);
+          return $("#tooltip").toggle();
         });
         $showAllButton = $("<input type=\"button\" id=\"showAllButton\" value=\"Show All\"></input>").appendTo($container);
         $showAllButton.click(function() {

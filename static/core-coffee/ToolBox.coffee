@@ -14,23 +14,18 @@ define [], () ->
       @selection = instances["NodeSelection"]
       
       #instances["Layout"].addPlugin @el, @options.pluginOrder, 'Explorations', true
-      $(@el).attr("class", "toolboxpopout").css("background", "white")
+      $(@el).attr("class", "toolboxpopout")
       $(@el).appendTo $('#maingraph')
 
       $(@el).hide()
+
+      # $(@tooltip).hide()
 
       @graphView = instances["GraphView"]
       @listView = instances["local/ListView"]
 
     render: ->
       $container = $("<div id=\"show-all-container\">").appendTo(@$el)
-      # $mouseover = $("<div id=\"tooltips\">").appendTo(@$el)
-      # mouseX = 0
-      # mouseY = 0
-      # $(document).mousemove( (e) =>
-      #   mouseX = e.pageX 
-      #   mouseY = e.pageY
-      # )
 
       $('#listviewButton').click(() =>
         $(@listView.el).show()
@@ -47,19 +42,61 @@ define [], () ->
         )
 
       $('#minimapButton').click(() =>
+        $('#slidersPopOut').hide()
         $('#minimapPopOut').toggle()
+        $(@el).hide()
         )
-      # $('#minimapButton').hover(() =>
-      #   $('#testing').css({'bottom':mouseY,'right':mouseX}).fadeIn('slow')
-      #   )
 
       $('#slidersButton').click(() =>
         $('#slidersPopOut').toggle()
+        $('#minimapPopOut').hide()
+        $(@el).hide()
         )
 
       $('#moreoptionsButton').click(() =>
-        $(@el).toggle()
+        $('#slidersPopOut').hide()
+        $('#minimapPopOut').hide()
+        $(@el).toggle()        
         )
+
+#TOOLTIPS
+      $('#maingraph').append("<div id=\"tooltip\" class=\"tooltiphover\" style=\"display:none\"></div>")
+
+      mouseX = 0
+      mouseY = 0
+      $(document).mousemove( (e) =>
+        widthDigits = $('#maingraph').css("width").length
+        # heightDigits = $('#maingraph').css("height").length
+        mouseX = $('#maingraph').css("width").substring(0,widthDigits-2)-e.pageX 
+        # mouseY = $('#maingraph').css("height").substring(0,heightDigits-2)-e.pageY
+      )
+
+      $('#slidersButton').hover(() =>
+        $("#tooltip").empty()
+        $("<p style=\"font-size:10px\"><b>SLIDERS:</b> <br> <i>currently allows adjustment of spacing of the nodes</i></p>").appendTo $("#tooltip")
+        $("#tooltip").css("right",mouseX-30)
+        # $("#tooltip").css("bottom",mouseY+30)
+        $("#tooltip").toggle()
+        )
+
+      $('#minimapButton').hover(() =>
+        $("#tooltip").empty()
+        $("<p style=\"font-size:10px\"><b>MINIMAP:</b> <br> <i>a closeup view of the most recently selected node</i></p>").appendTo $("#tooltip")
+        $("#tooltip").css("right",mouseX-30)
+        # $("#tooltip").css("bottom",mouseY+30)
+        $("#tooltip").toggle()
+        )
+
+      $('#moreoptionsButton').hover(() =>
+        $("#tooltip").empty()
+        $("<p style=\"font-size:10px\"><b>MORE OPTIONS:</b> <br> <i>additional buttons with different functionality</i></p>").appendTo $("#tooltip")
+        $("#tooltip").css("right",mouseX-30)
+        # $("#tooltip").css("bottom",mouseY+30)
+        $("#tooltip").toggle()
+        )      
+
+
+
 
       $showAllButton = $("<input type=\"button\" id=\"showAllButton\" value=\"Show All\"></input>").appendTo $container
       $showAllButton.click(() =>
