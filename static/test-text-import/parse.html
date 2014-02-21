@@ -1,0 +1,59 @@
+<input type="file" id="fileinput"/>
+<script type="text/javascript">
+
+
+// reads csv with properties on first line and values on second line. Converts to query within variable 'totalQuery'
+	function readTextFile(evt) {
+		var file = evt.target.files[0];
+
+		if (file) {
+			var fReader = new FileReader();
+			fReader.onload = function(textData) {
+				var contents = textData.target.result.split("\n");
+
+			//properties are taken as the first row with values in it
+				var properties = new Array();
+				properties = contents[0].split(",");
+
+			//removes property rows with no data
+				while (properties.length == contents[0].length+1){
+					contents.shift();
+					properties = contents[0].split(",");
+				}
+				
+				var totalQuery = "";
+
+				for (var i=1;i<contents.length;i++){
+					var tempValues = new Array();
+					tempValues = contents[i].split(",");
+
+
+					if (tempValues.length == contents[i].length+1){
+						continue;
+					}
+
+					var individualQuery = "create(n{";
+					for (var j=0;j<properties.length;j++){
+						if (properties[j]!=""){
+							properties[j]=properties[j].replace(" ","_");
+							individualQuery = individualQuery + properties[j] + ":" + tempValues[j] + ", ";	
+						}
+
+					}
+					individualQuery = individualQuery.substring(0,individualQuery.length-2) + "})\n";
+					totalQuery = totalQuery+individualQuery;
+				}
+				console.log(totalQuery);
+				alert(totalQuery);
+			}
+			fReader.readAsText(file);
+		} else {
+			alert("Failed to load file");
+		}
+	}
+
+	document.getElementById('fileinput').addEventListener('change',readTextFile,false);
+
+</script>
+
+
