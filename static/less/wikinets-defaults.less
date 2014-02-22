@@ -15,6 +15,39 @@ body {
     z-index: 1000;
 }
 
+.tooltiphover {
+    position:fixed;
+    bottom:60px;
+    right:60px;
+    padding:5px;
+    display:none;
+/*    border:2px solid gray;*/
+    /*border-bottom:0px;*/
+    -moz-border-radius:10px;
+    -webkit-border-radius:10px;
+    width: 80px;
+    background-color: lightblue;
+    z-index:2;
+}
+.tooltiphover:after {
+  position: absolute;
+  display: block;
+  content: "";
+  border-color: lightblue transparent transparent transparent;
+  border-style: solid;
+  border-width: 10px;
+  border-bottom: none;
+  height:0;
+  width:0;
+  position:absolute;
+  bottom:-8px;
+  left:40px;
+  -moz-user-select: none; 
+  -khtml-user-select: none; 
+  -webkit-user-select: none; 
+  -o-user-select: none; 
+}
+
 .toolboxpopout {
     position:fixed;
     bottom:45px;
@@ -25,19 +58,9 @@ body {
     /*border-bottom:0px;*/
     width: 189px;
     background-color: white;
+    z-index:1;
 }
 
-.tooltiphover {
-    position:fixed;
-    bottom:60px;
-    right:60px;
-    padding:5px;
-    display:none;
-/*    border:2px solid gray;*/
-    /*border-bottom:0px;*/
-    width: 60px;
-    background-color: lightblue;    
-}
 
 #omniBox {
     float:left;

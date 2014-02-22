@@ -7,6 +7,9 @@
   define([], function() {
     var ToolBox;
     return ToolBox = (function(_super) {
+      var readTextFile,
+        _this = this;
+
       __extends(ToolBox, _super);
 
       function ToolBox(options) {
@@ -22,6 +25,7 @@
         this.graphModel = instances["GraphModel"];
         this.dataProvider = instances["local/WikiNetsDataProvider"];
         this.selection = instances["NodeSelection"];
+        this.dataController = instances["local/Neo4jDataController"];
         $(this.el).attr("class", "toolboxpopout");
         $(this.el).appendTo($('#maingraph'));
         $(this.el).hide();
@@ -30,7 +34,7 @@
       };
 
       ToolBox.prototype.render = function() {
-        var $chooseSelectButton, $clearAllButton, $clearSelectedButton, $container, $deselectAllButton, $expandSelectionButton, $pinSelectedButton, $selectAllButton, $showAllButton, $showLearningButton, $showResearchButton, $showStudentLifeButton, $unpinAllButton, $unpinSelectedButton, mouseX, mouseY,
+        var $chooseSelectButton, $clearAllButton, $clearSelectedButton, $container, $deselectAllButton, $expandSelectionButton, $pinSelectedButton, $selectAllButton, $showAllButton, $showLearningButton, $showResearchButton, $showStudentLifeButton, $textImportSelection, $unpinAllButton, $unpinSelectedButton, mouseX, mouseY,
           _this = this;
         $container = $("<div id=\"show-all-container\">").appendTo(this.$el);
         $('#listviewButton').click(function() {
@@ -59,32 +63,6 @@
           $('#slidersPopOut').hide();
           $('#minimapPopOut').hide();
           return $(_this.el).toggle();
-        });
-        $('#maingraph').append("<div id=\"tooltip\" class=\"tooltiphover\" style=\"display:none\"></div>");
-        mouseX = 0;
-        mouseY = 0;
-        $(document).mousemove(function(e) {
-          var widthDigits;
-          widthDigits = $('#maingraph').css("width").length;
-          return mouseX = $('#maingraph').css("width").substring(0, widthDigits - 2) - e.pageX;
-        });
-        $('#slidersButton').hover(function() {
-          $("#tooltip").empty();
-          $("<p style=\"font-size:10px\"><b>SLIDERS:</b> <br> <i>currently allows adjustment of spacing of the nodes</i></p>").appendTo($("#tooltip"));
-          $("#tooltip").css("right", mouseX - 30);
-          return $("#tooltip").toggle();
-        });
-        $('#minimapButton').hover(function() {
-          $("#tooltip").empty();
-          $("<p style=\"font-size:10px\"><b>MINIMAP:</b> <br> <i>a closeup view of the most recently selected node</i></p>").appendTo($("#tooltip"));
-          $("#tooltip").css("right", mouseX - 30);
-          return $("#tooltip").toggle();
-        });
-        $('#moreoptionsButton').hover(function() {
-          $("#tooltip").empty();
-          $("<p style=\"font-size:10px\"><b>MORE OPTIONS:</b> <br> <i>additional buttons with different functionality</i></p>").appendTo($("#tooltip"));
-          $("#tooltip").css("right", mouseX - 30);
-          return $("#tooltip").toggle();
         });
         $showAllButton = $("<input type=\"button\" id=\"showAllButton\" value=\"Show All\"></input>").appendTo($container);
         $showAllButton.click(function() {
@@ -173,10 +151,53 @@
           });
         });
         $showResearchButton = $("<input type=\"button\" id=\"showResearchButton\" value=\"Research\"></input>").appendTo($container);
-        return $showResearchButton.click(function() {
+        $showResearchButton.click(function() {
           return _this.searchNodes({
             Theme: "Research"
           });
+        });
+        $textImportSelection = $("<br><input type=\"file\" id=\"fileinput\"/>").appendTo($container);
+        $textImportSelection.change(readTextFile);
+        $('#maingraph').append("<div id=\"tooltip\" class=\"tooltiphover\" style=\"display:none\"></div>");
+        mouseX = 0;
+        mouseY = 0;
+        $(document).mousemove(function(e) {
+          var heightDigits, widthDigits;
+          widthDigits = $('#maingraph').css("width").length;
+          heightDigits = $('#maingraph').css("height").length;
+          mouseX = $('#maingraph').css("width").substring(0, widthDigits - 2) - e.pageX;
+          return mouseY = $('#maingraph').css("height").substring(0, heightDigits - 2) - e.pageY;
+        });
+        $('#slidersButton').hover(function() {
+          $("#tooltip").empty();
+          $("<p style=\"font-size:10px\"><b>SLIDERS:</b> <br> <i>currently allows adjustment of spacing of the nodes</i></p>").appendTo($("#tooltip"));
+          $("#tooltip").css("right", mouseX - 40);
+          $("#tooltip").css("bottom", 63);
+          return $("#tooltip").toggle();
+        });
+        $('#minimapButton').hover(function() {
+          $("#tooltip").empty();
+          $("<p style=\"font-size:10px\"><b>MINIMAP:</b> <br> <i>a closeup view of the most recently selected node</i></p>").appendTo($("#tooltip"));
+          $("#tooltip").css("right", mouseX - 40);
+          $("#tooltip").css("bottom", 63);
+          return $("#tooltip").toggle();
+        });
+        $('#moreoptionsButton').hover(function() {
+          $("#tooltip").empty();
+          $("<p style=\"font-size:10px\"><b>MORE OPTIONS:</b> <br> <i>additional buttons with different functionality</i></p>").appendTo($("#tooltip"));
+          $("#tooltip").css("right", mouseX - 40);
+          $("#tooltip").css("bottom", 63);
+          return $("#tooltip").toggle();
+        });
+        $textImportSelection.mouseover(function() {
+          $("#tooltip").empty();
+          $("<p style=\"font-size:10px\"><b>CSV Text File Import:</b> <br> <i>Convert your excel spreadsheet to CSV and import. <br> top row must be property names. <br> cells should not contain ','</i></p>").appendTo($("#tooltip"));
+          $("#tooltip").css("right", mouseX - 40);
+          $("#tooltip").css("bottom", mouseY + 13);
+          return $("#tooltip").show();
+        });
+        return $textImportSelection.mouseleave(function() {
+          return $("#tooltip").hide();
         });
       };
 
@@ -216,9 +237,56 @@
         });
       };
 
+      readTextFile = function(evt) {
+        var fReader, file;
+        file = evt.target.files[0];
+        if (file) {
+          fReader = new FileReader();
+          fReader.onload = function(textData) {
+            var contents, i, individualQuery, j, properties, tempValues, totalQuery, _results;
+            contents = textData.target.result.split("\n");
+            properties = new Array();
+            properties = contents[0].split(",");
+            while (properties.length === contents[0].length + 1) {
+              contents.shift();
+              properties = contents[0].split(",");
+            }
+            totalQuery = [];
+            i = 1;
+            while (i < contents.length) {
+              tempValues = new Array();
+              tempValues = contents[i].split(",");
+              if (tempValues.length !== contents[i].length + 1) {
+                individualQuery = {};
+                j = 0;
+                while (j < properties.length) {
+                  if (properties[j] !== "") {
+                    properties[j] = properties[j].replace(" ", "_");
+                    individualQuery[properties[j]] = tempValues[j].replace(/'/g, "\\'");
+                  }
+                  j++;
+                }
+                totalQuery.push(individualQuery);
+              }
+              i++;
+            }
+            i = 0;
+            _results = [];
+            while (i < totalQuery.length) {
+              console.log(totalQuery[i]);
+              _results.push(i++);
+            }
+            return _results;
+          };
+          fReader.readAsText(file);
+        } else {
+          alert("Failed to load file");
+        }
+      };
+
       return ToolBox;
 
-    })(Backbone.View);
+    }).call(this, Backbone.View);
   });
 
 }).call(this);
