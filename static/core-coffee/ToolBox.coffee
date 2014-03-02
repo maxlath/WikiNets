@@ -4,6 +4,8 @@ define [], () ->
 
   class ToolBox extends Backbone.View
 
+    globalTextImportVariable =[]
+
     constructor: (@options) ->
       super()
 
@@ -133,8 +135,17 @@ define [], () ->
 
       $textImportSelection = $("<br><input type=\"file\" id=\"fileinput\"/>").appendTo $container
       $textImportSelection.change(readTextFile)
-      # textImportSelection.addEventListener("change", readTextFile, false)
       
+      $textImportSubmit = $("<input type=\"button\" id=\"submitImport\" value=\"Submit Import\"></input>").appendTo $container
+      $textImportSubmit.click(() =>
+          i=0
+          while i<globalTextImportVariable.length
+            @dataController.nodeAdd(globalTextImportVariable[i])
+            i++
+          globalTextImportVariable=[]
+        )
+
+
       # $sizeByMenu = $("")
       # $.get "/get_all_node_keys", (data)=>
         
@@ -221,25 +232,23 @@ define [], () ->
           properties = contents[0].split(",")
 
           #removes property rows with no data
-          while properties.length is contents[0].length + 1
+          while properties.length is contents[0].length
             contents.shift()
             properties = contents[0].split(",")
-
           totalQuery=[]
           i = 1
           while i < contents.length
             tempValues = new Array()
             tempValues = contents[i].split(",")
-            unless tempValues.length is contents[i].length + 1
+            unless contents[i].length is tempValues.length or contents[i].length is 0
               individualQuery = {}
               j = 0
               while j < properties.length
-                unless properties[j] is ""
+                unless properties[j] is "" or properties[j] is " "
+                  console.log "property" + properties[j]
                   properties[j] = properties[j].replace(" ", "_")
                   individualQuery[properties[j]] = tempValues[j].replace(/'/g,"\\'")
                 j++
-              # individualQuery = individualQuery.substring(0, individualQuery.length - 2) + "}"
-              # totalQuery = totalQuery + individualQuery
               totalQuery.push(individualQuery)
               # @dataController.nodeAdd(individualQuery)
             i++
@@ -248,6 +257,8 @@ define [], () ->
           while i<totalQuery.length
             console.log totalQuery[i]
             i++
+          alert "Text Import Loaded. \nPlease check javascript console and then press 'Submit Import' to create the nodes"
+          globalTextImportVariable = totalQuery
         fReader.readAsText file
       else
         alert "Failed to load file"
